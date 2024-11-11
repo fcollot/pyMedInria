@@ -1,0 +1,45 @@
+# Copyright (c) 2024 IHU Liryc, Université de Bordeaux, Inria.
+# License: BSD-3-Clause
+
+if(NOT EXISTS ${TARGET_FILE})
+    message(FATAL_ERROR "The file ${TARGET_FILE} does not exist.")
+endif()
+
+execute_process(
+    COMMAND otool -L "${TARGET_FILE}"
+    OUTPUT_VARIABLE dependencies
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+
+string(REPLACE "\n" ";" dependencies ${dependencies})
+
+set(updates)
+
+if("@PYMED_QT_PACKAGE@" STREQUAL "Qt5")
+    set(qt_version_subdir 5)
+else()
+    set(qt_version_subdir A)
+endif()
+
+set(python_subdir "@pyncpp_PYTHON_SUBDIR@")
+set(pyside_subdir "@PYMED_PYSIDE_PACKAGE@")
+
+foreach(dependency IN LISTS dependencies)
+    string(STRIP "${dependency}" dependency)
+
+    if(dependency MATCHES ".*/Qt([A-Za-z0-9]+)\\.framework/Versions/${qt_version_subdir}/Qt[A-Za-z0-9]+")
+        set(new_path "@rpath/${python_subdir}/site-packages/${pyside_subdir}/Qt/lib/Qt${CMAKE_MATCH_1}.framework/Versions/${qt_version_subdir}/Qt${CMAKE_MATCH_1}")
+        list(APPEND updates ${CMAKE_MATCH_0} ${new_path})
+    endif()
+endforeach()
+
+while(updates)
+    list(POP_BACK updates new_path)
+    list(POP_BACK updates old_path)
+
+    execute_process(
+        COMMAND install_name_tool -change "${old_path}" "${new_path}" "${TARGET_FILE}"
+        )
+
+    message(STATUS "Updated ${old_path} -> ${new_path}")
+endwhile()

@@ -51,6 +51,7 @@ project(pyMedInria VERSION "${PYMED_VERSION}")
 
 include(CMakeDependentOption)
 include(CTest)
+include(ExternalProject)
 
 ################################################################################
 # Settings
@@ -69,13 +70,11 @@ set(FETCHCONTENT_BASE_DIR "${CMAKE_BINARY_DIR}")
 
 set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 
-option(PYMED_STANDALONE "Build standalone" OFF)
+option(PYMED_BUILD_STANDALONE "Build the standalone" ON)
 
-if(APPLE)
-    cmake_dependent_option(PYMED_MACOS_BUNDLE "Build standalone as a bundle" ON "PYMED_STANDALONE" OFF)
-endif()
+cmake_dependent_option(PYMED_BUILD_LIBRARY "Build the library (a wrapper over pyncpp with helper bindings for Qt, ITK and VTK)" ON "NOT PYMED_BUILD_STANDALONE" ON)
 
-cmake_dependent_option(PYMED_VIRTUAL_ENV "Create a virtual environment in the build directory" OFF "NOT PYMED_STANDALONE" OFF)
+cmake_dependent_option(PYMED_BUILD_PYTHON "Build a custom Python interpreter" OFF "NOT PYMED_BUILD_STANDALONE" ON)
 
 if(WIN32)
     string(CONCAT symlink_message
@@ -104,36 +103,31 @@ endif()
 
 set(PYMED_ROOT_BASE "${CMAKE_CURRENT_BINARY_DIR}")
 set(PYMED_ROOT "${PYMED_ROOT_BASE}/$<CONFIG>")
-set(PYMED_PACKAGE_ROOT "${PYMED_ROOT}/packages")
-set(PYMED_VIRTUAL_ENV_ROOT "${PYMED_ROOT}/venv")
 
-if(UNIX)
-    if(APPLE AND PYMED_MACOS_BUNDLE)
-        set(contents_subdir "pyMedInria.app/Contents")
-        set(PYMED_STANDALONE_LIBRARY_SUBDIR "${contents_subdir}/Frameworks")
-        set(PYMED_STANDALONE_RUNTIME_SUBDIR "${contents_subdir}/MacOS")
-    else()
-        set(PYMED_STANDALONE_RUNTIME_SUBDIR "bin")
-        set(PYMED_STANDALONE_LIBRARY_SUBDIR "lib")
-    endif()
-
-    set(PYMED_PACKAGE_RUNTIME_SUBDIR "bin")
-    set(PYMED_PACKAGE_LIBRARY_SUBDIR "lib")
-    set(PYMED_PACKAGE_ARCHIVE_SUBDIR "lib")
-    set(PYMED_PACKAGE_SHARE_SUBDIR "share/cmake/mbox")
+if(WIN32)
+    set(CMAKE_INSTALL_BINDIR "bin")
+    set(CMAKE_INSTALL_LIBDIR "bin")
+    set(CMAKE_INSTALL_INCLUDEDIR "include")
+    set(share_subdir "cmake")
 else()
-    set(PYMED_STANDALONE_RUNTIME_SUBDIR "bin")
-    set(PYMED_STANDALONE_LIBRARY_SUBDIR "bin")
-    set(PYMED_PACKAGE_RUNTIME_SUBDIR "bin")
-    set(PYMED_PACKAGE_LIBRARY_SUBDIR "bin")
-    set(PYMED_PACKAGE_ARCHIVE_SUBDIR "libs")
-    set(PYMED_PACKAGE_SHARE_SUBDIR "cmake")
+    include(GNUInstallDirs)
+    set(share_subdir "share/cmake/pyMedInria")
 endif()
 
-set(PYMED_PACKAGE_INCLUDE_SUBDIR "include")
+set(PYMED_SHARE_SUBDIR "${share_subdir}" CACHE PATH "")
 
 ################################################################################
 # Subdirectories
 ################################################################################
 
-add_subdirectory(source)
+add_subdirectory(pyMedInria)
+
+add_subdirectory(python)
+
+if(PYMED_BUILD_LIBRARY)
+    add_subdirectory(library)
+endif()
+
+if(PYMED_BUILD_STANDALONE)
+    add_subdirectory(standalone)
+endif()
