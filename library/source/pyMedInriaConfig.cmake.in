@@ -1,0 +1,39 @@
+# Copyright (c) 2024 IHU Liryc, Université de Bordeaux, Inria.
+# License: BSD-3-Clause
+
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+set(pyMedInria_FOUND TRUE)
+set(pyMedInria_ROOT "${PACKAGE_PREFIX_DIR}")
+
+set(pyMedInria_SHARE_SUBDIR "@PYNCPP_SHARE_SUBDIR@")
+
+set(pyMedInria_FIND_REQUIRED_COMPONENTS)
+
+foreach(component ${pyMedInria_FIND_COMPONENTS})
+    if(pyMedInria_FIND_REQUIRED_${component})
+        list(APPEND pyMedInria_FIND_REQUIRED_COMPONENTS ${component})
+    endif()
+endforeach()
+
+file(GLOB config_modules "${CMAKE_CURRENT_LIST_DIR}/pyMedInriaConfig_*.cmake")
+
+foreach(module ${config_modules})
+    include(${module})
+endforeach()
+
+find_dependency(@MED_QT_PACKAGE@ REQUIRED
+    COMPONENTS
+    Core
+    Widgets
+    )
+
+find_dependency(pyncpp REQUIRED)
+
+include("${CMAKE_CURRENT_LIST_DIR}/pyMedInria_library_export.cmake")
+
+set(pyMedInria_LIBRARY pyMedInria_library)
+
+check_required_components(pyMedInria)

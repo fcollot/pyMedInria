@@ -51,6 +51,7 @@ project(pyMedInria VERSION "${MED_VERSION}")
 
 include(CMakeDependentOption)
 include(CTest)
+include(ExternalProject)
 
 ################################################################################
 # Settings
@@ -69,13 +70,15 @@ set(FETCHCONTENT_BASE_DIR "${CMAKE_BINARY_DIR}")
 
 set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 
-option(MED_STANDALONE "Build standalone" OFF)
+option(MED_BUILD_STANDALONE "Build the standalone" ON)
+
+cmake_dependent_option(MED_BUILD_LIBRARY "Build the library (a wrapper over pyncpp with helper bindings for Qt, ITK and VTK)" ON "NOT MED_BUILD_STANDALONE" ON)
+
+cmake_dependent_option(MED_BUILD_PYTHON "Build a custom Python interpreter" ON "NOT MED_BUILD_STANDALONE" ON)
 
 if(APPLE)
-    cmake_dependent_option(MED_MACOS_BUNDLE "Build standalone as a bundle" ON "MED_STANDALONE" OFF)
+    cmake_dependent_option(MED_MACOS_BUNDLE "Build the standalone as a bundle" ON "MED_STANDALONE" OFF)
 endif()
-
-cmake_dependent_option(MED_VIRTUAL_ENV "Create a virtual environment in the build directory" OFF "NOT MED_STANDALONE" OFF)
 
 if(WIN32)
     string(CONCAT symlink_message
@@ -105,35 +108,31 @@ endif()
 set(MED_ROOT_BASE "${CMAKE_CURRENT_BINARY_DIR}")
 set(MED_ROOT "${MED_ROOT_BASE}/$<CONFIG>")
 set(MED_PACKAGE_ROOT "${MED_ROOT}/packages")
-set(MED_VIRTUAL_ENV_ROOT "${MED_ROOT}/venv")
 
 if(UNIX)
     if(APPLE AND MED_MACOS_BUNDLE)
-        set(contents_subdir "pyMedInria.app/Contents")
-        set(MED_STANDALONE_LIBRARY_SUBDIR "${contents_subdir}/Frameworks")
-        set(MED_STANDALONE_RUNTIME_SUBDIR "${contents_subdir}/MacOS")
-    else()
-        set(MED_STANDALONE_RUNTIME_SUBDIR "bin")
-        set(MED_STANDALONE_LIBRARY_SUBDIR "lib")
+#        set(contents_dir "${MED_ROOT}/pyMedInria.app/Contents")
+#        set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${contents_dir}/Frameworks")
+#        set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${contents_dir}/MacOS")
     endif()
 
-    set(MED_PACKAGE_RUNTIME_SUBDIR "bin")
-    set(MED_PACKAGE_LIBRARY_SUBDIR "lib")
-    set(MED_PACKAGE_ARCHIVE_SUBDIR "lib")
-    set(MED_PACKAGE_SHARE_SUBDIR "share/cmake/mbox")
+    set(MED_SHARE_SUBDIR "share/cmake/pyMedInria")
 else()
-    set(MED_STANDALONE_RUNTIME_SUBDIR "bin")
-    set(MED_STANDALONE_LIBRARY_SUBDIR "bin")
-    set(MED_PACKAGE_RUNTIME_SUBDIR "bin")
-    set(MED_PACKAGE_LIBRARY_SUBDIR "bin")
-    set(MED_PACKAGE_ARCHIVE_SUBDIR "libs")
-    set(MED_PACKAGE_SHARE_SUBDIR "cmake")
 endif()
-
-set(MED_PACKAGE_INCLUDE_SUBDIR "include")
 
 ################################################################################
 # Subdirectories
 ################################################################################
 
-add_subdirectory(source)
+add_subdirectory(python)
+add_subdirectory(package)
+
+if(MED_BUILD_LIBRARY)
+    add_subdirectory(library)
+endif()
+
+if(MED_BUILD_STANDALONE)
+    add_subdirectory(standalone)
+endif()
+
+add_subdirectory(packaging)

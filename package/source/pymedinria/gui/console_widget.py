@@ -85,7 +85,7 @@ class ConsoleWidget(QWidget):
     def run(self, *, globals={}):
         self._setup_output_streams()
         self._console.run_ended.connect(self.run_ended)
-        self._console.run(command_line_thread=threading.main_thread())
+        self._console.run(globals=globals, command_line_thread=threading.main_thread())
 
     def _setup_output_streams(self):
         self._stdout = sys.stdout
