@@ -1,0 +1,31 @@
+# Copyright (c) 2024 IHU Liryc, Université de Bordeaux, Inria.
+# License: BSD-3-Clause
+
+function(pyMedInria_update_dependencies target)
+
+    if(APPLE)
+        add_custom_command(TARGET ${target} POST_BUILD
+            COMMAND ${CMAKE_COMMAND}
+            -D "TARGET_FILE:PATH=$<TARGET_FILE:${target}>"
+            -P "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/pyMedInria_update_dependencies.cmake"
+            VERBATIM
+            )
+    endif()
+
+endfunction()
+
+macro(pyMedInria_add_library target)
+
+    add_library(${target} ${ARGN})
+
+    pyMedInria_update_dependencies(${target})
+
+endmacro()
+
+macro(pyMedInria_add_executable target)
+
+    add_executable(${target} ${ARGN})
+
+    pyMedInria_update_dependencies(${target})
+
+endmacro()
