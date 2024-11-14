@@ -9,8 +9,7 @@ int main(int argc, char** argv)
 {
     int exitStatus = EXIT_SUCCESS;
 
-    med::Manager::setPythonHome(PYTHON_HOME);
-    med::Manager::setCommandLineArguments(argc, argv);
+    med::Manager::setPythonHome(PYTHON_HOME, "Frameworks");
     med::Manager& pyncppManager = med::Manager::instance();
 
     if (pyncppManager.errorOccured())
@@ -22,13 +21,23 @@ int main(int argc, char** argv)
     {
         try
         {
-            //pyncppManager.prependModulePath(PYMEDINRIA_PACKAGE_PATH);
-            exitStatus = med::Module::import("pymedinria").callMethod("run").toCPP<long>();
+            med::Object sysArgv = med::Module::import("sys").attribute("argv");
+
+            for (size_t i = 1; i < argc; i++)
+            {
+                sysArgv.append(med::Object(argv[i]));
+            }
+
+            med::Module::import("pymedinria.app").callMethod("main").toCPP<long>();
         }
         catch (med::Exception& e)
         {
             qCritical() << "Python error: " << e.what();
             exitStatus = EXIT_FAILURE;
+        }
+        catch (med::SystemExit& e)
+        {
+            exitStatus = (std::string(e.what()) == "0") ? EXIT_SUCCESS : EXIT_FAILURE;
         }
     }
 

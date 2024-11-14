@@ -87,19 +87,6 @@ add_library(${target} SHARED
     ${sources}
     )
 
-#add_dependencies(med_library_cpp med_python_packages)
-
-################################################################################
-# Target properties
-################################################################################
-
-#set_target_properties(med_library_cpp PROPERTIES
-#    OUTPUT_NAME MusicBox
-#    RUNTIME_OUTPUT_DIRECTORY "${MED_PACKAGE_ROOT}/musicbox/${MED_PACKAGE_RUNTIME_SUBDIR}"
-#    LIBRARY_OUTPUT_DIRECTORY "${MED_PACKAGE_ROOT}/musicbox/${MED_PACKAGE_LIBRARY_SUBDIR}"
-#    ARCHIVE_OUTPUT_DIRECTORY "${MED_PACKAGE_ROOT}/musicbox/${MED_PACKAGE_ARCHIVE_SUBDIR}"
-#    )
-
 ################################################################################
 # Compile definitions
 ################################################################################
@@ -123,11 +110,11 @@ target_compile_definitions(${target} PUBLIC
 
 target_include_directories(${target}
     PRIVATE
-    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/pyMedInria"
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/pyMedInria>"
     PUBLIC
     #${qt_includes}
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
-    "$<INSTALL_INTERFACE:include/pyMedInria>"
+    "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/pyMedInria>"
     )
 
 ################################################################################
@@ -217,15 +204,28 @@ endforeach()
 
 install(TARGETS ${target}
     EXPORT ${target}_export
+
+    RUNTIME
+    DESTINATION "${CMAKE_INSTALL_BINDIR}"
     COMPONENT Runtime
+
+    LIBRARY
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+    COMPONENT Runtime
+
+    ARCHIVE
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+    COMPONENT Development
     )
 
 install(EXPORT ${target}_export
     DESTINATION "${MED_SHARE_SUBDIR}"
+    COMPONENT Development
     )
 
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/"
-    DESTINATION "include/pyMedInria"
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/pyMedInria"
+    COMPONENT Development
     FILES_MATCHING PATTERN "*.h"
     PATTERN "CMakeLists.txt" EXCLUDE
     )

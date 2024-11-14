@@ -25,95 +25,49 @@ file(GLOB_RECURSE sources RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
     "${CMAKE_CURRENT_SOURCE_DIR}/*.py"
     )
 
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/setup.py"
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in"
     "${CMAKE_CURRENT_BINARY_DIR}/setup.py"
     @ONLY)
-
-if(UNIX OR MED_SYMLINK_SOURCE_PACKAGE)
-    set(link_command create_symlink)
-else()
-    set(link_command copy_directory)
-endif()
-
-add_custom_target(${PROJECT_NAME}_package ALL
-    COMMAND ${CMAKE_COMMAND} -E rm -rf pymedinria
-    COMMAND ${CMAKE_COMMAND} -E ${link_command} "${CMAKE_CURRENT_SOURCE_DIR}/pymedinria" pymedinria
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_BINARY_DIR}/setup.py" .
-    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-    VERBATIM
-    )
-
-################################################################################
-# Virtual env
-################################################################################
-
-if(MED_BUILD_PYTHON)
-
-#    add_custom_target(${PROJECT_NAME}_install_package ALL
-#        COMMAND "${pyncpp_EXECUTABLE}" -m ensurepip
-#        COMMAND "${pyncpp_EXECUTABLE}" -m pip install -e "${MED_ROOT}/package"
-#        VERBATIM
-#        )
-
-#    add_dependencies(${PROJECT_NAME}_install_package ${PROJECT_NAME}_package)
-
-    ############################################################################
-    # Runner targets
-    ############################################################################
-
-#    add_custom_target(med_run_application
-#        COMMAND "${Python_EXECUTABLE}" -m pymedinria
-#        VERBATIM
-#        )
-
-#    add_dependencies(med_run_application med_install_packages)
-
-#    add_custom_target(med_run_tests
-#        COMMAND "${Python_EXECUTABLE}" -m pymedinria --test
-#        VERBATIM
-#        )
-
-#    add_dependencies(med_run_tests med_install_packages)
-    
-    ############################################################################
-    # Distribution
-    ############################################################################
-
-#    add_custom_target(med_build_distribution ALL
-#        COMMAND "${Python_EXECUTABLE}" -m build "${MED_PACKAGE_ROOT}/pymedinria"
-#        VERBATIM
-#        )
-        
-#    add_dependencies(med_build_distribution med_install_packages)
-
-    ############################################################################
-    # CTest
-    ############################################################################
-
-#    add_test(NAME ${PROJECT_NAME}_no_gui
-#        COMMAND "${Python_EXECUTABLE}" -m pymedinria --test no-gui
-#        )
-
-#    add_test(NAME ${PROJECT_NAME}_gui
-#        COMMAND "${Python_EXECUTABLE}" -m pymedinria --test gui
-#        )
-
-#    set_property(TEST ${PROJECT_NAME}_no_gui PROPERTY LABELS TEST_NO_GUI)
-#    set_property(TEST ${PROJECT_NAME}_gui PROPERTY LABELS TEST_GUI)
-
-endif()
 
 ################################################################################
 # Install
 ################################################################################
 
-if(MED_BUILD_PYTHON)
+set(package_subdir "${CMAKE_INSTALL_LIBDIR}/pyMedInria")
+
+install(CODE "
+    if(NOT EXISTS \"\${CMAKE_INSTALL_PREFIX}/${package_subdir}\")
+        file(MAKE_DIRECTORY \"\${CMAKE_INSTALL_PREFIX}/${package_subdir}\")
+    endif()
+    "
+    COMPONENT Runtime
+    )
+
+if(UNIX OR MED_SYMLINK_SOURCE_PACKAGE)
     install(CODE "
-        execute_process(
-            COMMAND \"${pyncpp_EXECUTABLE}\" -m ensurepip
-            COMMAND \"${pyncpp_EXECUTABLE}\" -m pip install -e \"${CMAKE_CURRENT_BINARY_DIR}\"
+        file(REMOVE_RECURSE \"\${CMAKE_INSTALL_PREFIX}/${package_subdir}/pymedinria\")
+        file(CREATE_LINK
+            \"${CMAKE_CURRENT_SOURCE_DIR}/pymedinria\"
+            \"\${CMAKE_INSTALL_PREFIX}/${package_subdir}/pymedinria\"
+            SYMBOLIC
             )
         "
-        COMPONENT Runtime
         )
+
+    set(exclude_from_all EXCLUDE_FROM_ALL)
+else()
+    set(exclude_from_all)
 endif()
+
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/pymedinria"
+    DESTINATION "${package_subdir}"
+    ${exclude_from_all}
+    COMPONENT Runtime
+    PATTERN "*.pyc" EXCLUDE
+    PATTERN "__pycache__" EXCLUDE
+    )
+
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/setup.py"
+    DESTINATION "${package_subdir}"
+    COMPONENT Runtime
+    )

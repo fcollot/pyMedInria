@@ -70,7 +70,7 @@ set(sources
 
 set(target ${PROJECT_NAME})
 
-add_executable(${target}
+add_executable(${target} WIN32
     ${sources}
     )
 
@@ -87,13 +87,26 @@ if(UNIX)
         set(rpath_prefix "\$ORIGIN")
     endif()
 
-    file(RELATIVE_PATH relative_lib_dir "/bin" "/lib")
+    if(APPLE)
+        set(bin_dir "${CMAKE_INSTALL_BINDIR}/pyMedInria.app/Contents/MacOS")
+        set(lib_dir "${CMAKE_INSTALL_BINDIR}/pyMedInria.app/Contents/Frameworks")
+    else()
+        set(bin_dir "${CMAKE_INSTALL_BINDIR}")
+        set(lib_dir "${CMAKE_INSTALL_LIBDIR}")
+    endif()
+
+    file(RELATIVE_PATH relative_lib_dir "/${bin_dir}" "/${lib_dir}")
     list(APPEND rpath "${rpath_prefix}/${relative_lib_dir}")
 
-    set(qt_lib_dir "${pyncpp_PYTHON_SITE_SUBDIR}")
-    string(APPEND qt_lib_dir "/${MED_PYSIDE_PACKAGE}/Qt/lib")
+    if(APPLE)
+        set(qt_lib_dir "${CMAKE_INSTALL_BINDIR}/pyMedInria.app/Contents/Frameworks")
+    else()
+        set(qt_lib_dir "${CMAKE_INSTALL_LIBDIR}")
+    endif()
 
-    file(RELATIVE_PATH relative_qt_lib_dir "/bin" "/${qt_lib_dir}")
+    string(APPEND qt_lib_dir "/${pyncpp_PYTHON_SUBDIR}/site-packages/${MED_PYSIDE_PACKAGE}/Qt/lib")
+
+    file(RELATIVE_PATH relative_qt_lib_dir "/${bin_dir}" "/${qt_lib_dir}")
     list(APPEND rpath "${rpath_prefix}/${relative_qt_lib_dir}")
 
     set_target_properties(${target} PROPERTIES
@@ -103,21 +116,26 @@ endif()
 
 set_target_properties(${target} PROPERTIES
     OUTPUT_NAME pyMedInria
-#    RUNTIME_OUTPUT_DIRECTORY "${MBOX_ROOT}/${MBOX_STANDALONE_RUNTIME_SUBDIR}"
-#    LIBRARY_OUTPUT_DIRECTORY "${MBOX_ROOT}/${MBOX_STANDALONE_LIBRARY_SUBDIR}"
-#    ARCHIVE_OUTPUT_DIRECTORY "${MBOX_ROOT}/${MBOX_STANDALONE_ARCHIVE_SUBDIR}"
     )
+
+if(APPLE)
+    set_target_properties(${target} PROPERTIES
+        MACOSX_BUNDLE TRUE
+        )
+endif()
 
 ################################################################################
 # Compile definitions
 ################################################################################
 
-file(RELATIVE_PATH relative_python_dir "/bin" "/${pyncpp_PYTHON_SUBDIR}")
-file(RELATIVE_PATH relative_package_dir "/bin" "/packages/pymedinria")
+if(APPLE)
+    set(relative_python_dir "..")
+else()
+    file(RELATIVE_PATH relative_python_dir "/${CMAKE_INSTALL_BINDIR}" "/${CMAKE_INSTALL_LIBDIR}")
+endif()
 
 target_compile_definitions(${target} PUBLIC
     PYTHON_HOME="${relative_python_dir}"
-    PYMEDINRIA_PACKAGE_PATH="${relative_package_dir}"
     )
 
 ################################################################################
@@ -146,12 +164,59 @@ if(APPLE)
         )
 endif()
 
-#set_qt_paths(mbox_executable_cpp)
-
 ################################################################################
 # Install/Export
 ################################################################################
 
 install(TARGETS ${target}
+    RUNTIME
+    DESTINATION "${CMAKE_INSTALL_BINDIR}"
+    COMPONENT Runtime
+
+    BUNDLE
+    DESTINATION "${CMAKE_INSTALL_BINDIR}"
     COMPONENT Runtime
     )
+
+install(CODE "
+    execute_process(
+        COMMAND ./python${CMAKE_EXECUTABLE_SUFFIX} -m ensurepip
+        COMMAND ./python${CMAKE_EXECUTABLE_SUFFIX} -m pip install -e \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/pyMedInria\"
+        WORKING_DIRECTORY \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}\"
+        )
+    "
+    )
+
+install(CODE "
+    execute_process(
+        COMMAND ./python${CMAKE_EXECUTABLE_SUFFIX} -m ensurepip
+        COMMAND ./python${CMAKE_EXECUTABLE_SUFFIX} -m pip install \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/pyMedInria\"
+        WORKING_DIRECTORY \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}\"
+        )
+    "
+    EXCLUDE_FROM_ALL
+    COMPONENT Runtime
+    )
+
+if(APPLE)
+    install(CODE "
+        file(REMOVE_RECURSE \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/pyMedInria.app/Contents/Frameworks\")
+        file(CREATE_LINK
+            \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}\"
+            \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/pyMedInria.app/Contents/Frameworks\"
+            SYMBOLIC
+            )
+        "
+        )
+
+    install(CODE "
+        file(REMOVE_RECURSE \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/pyMedInria.app/Contents/Frameworks\")
+        file(RENAME
+            \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}\"
+            \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/pyMedInria.app/Contents/Frameworks\"
+            )
+        "
+        EXCLUDE_FROM_ALL
+        COMPONENT Runtime
+        )
+endif()

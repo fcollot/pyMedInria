@@ -74,11 +74,7 @@ option(MED_BUILD_STANDALONE "Build the standalone" ON)
 
 cmake_dependent_option(MED_BUILD_LIBRARY "Build the library (a wrapper over pyncpp with helper bindings for Qt, ITK and VTK)" ON "NOT MED_BUILD_STANDALONE" ON)
 
-cmake_dependent_option(MED_BUILD_PYTHON "Build a custom Python interpreter" ON "NOT MED_BUILD_STANDALONE" ON)
-
-if(APPLE)
-    cmake_dependent_option(MED_MACOS_BUNDLE "Build the standalone as a bundle" ON "MED_STANDALONE" OFF)
-endif()
+cmake_dependent_option(MED_BUILD_PYTHON "Build a custom Python interpreter" OFF "NOT MED_BUILD_STANDALONE" ON)
 
 if(WIN32)
     string(CONCAT symlink_message
@@ -107,18 +103,18 @@ endif()
 
 set(MED_ROOT_BASE "${CMAKE_CURRENT_BINARY_DIR}")
 set(MED_ROOT "${MED_ROOT_BASE}/$<CONFIG>")
-set(MED_PACKAGE_ROOT "${MED_ROOT}/packages")
 
-if(UNIX)
-    if(APPLE AND MED_MACOS_BUNDLE)
-#        set(contents_dir "${MED_ROOT}/pyMedInria.app/Contents")
-#        set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${contents_dir}/Frameworks")
-#        set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${contents_dir}/MacOS")
-    endif()
-
-    set(MED_SHARE_SUBDIR "share/cmake/pyMedInria")
+if(WIN32)
+    set(CMAKE_INSTALL_BINDIR "bin")
+    set(CMAKE_INSTALL_LIBDIR "bin")
+    set(CMAKE_INSTALL_INCLUDEDIR "include")
+    set(share_subdir "cmake")
 else()
+    include(GNUInstallDirs)
+    set(share_subdir "share/cmake/pyMedInria")
 endif()
+
+set(MED_SHARE_SUBDIR "${share_subdir}" CACHE PATH "")
 
 ################################################################################
 # Subdirectories

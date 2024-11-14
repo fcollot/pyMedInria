@@ -12,6 +12,8 @@ set(cmake_args
     -D "CMAKE_CXX_STANDARD_REQUIRED:BOOL=${CMAKE_CXX_STANDARD_REQUIRED}"
     -D "CMAKE_MAKE_PROGRAM:PATH=${CMAKE_MAKE_PROGRAM}"
     -D "CMAKE_PREFIX_PATH:PATH=${MED_ROOT}"
+    -D "CMAKE_INSTALL_BINDIR:PATH=${CMAKE_INSTALL_BINDIR}"
+    -D "CMAKE_INSTALL_LIBDIR:PATH=${CMAKE_INSTALL_LIBDIR}"
     -D "MED_VERSION_MAJOR:STRING=${MED_VERSION_MAJOR}"
     -D "MED_VERSION_MINOR:STRING=${MED_VERSION_MINOR}"
     -D "MED_VERSION_PATCH:STRING=${MED_VERSION_PATCH}"
@@ -38,6 +40,21 @@ ExternalProject_Add(${PROJECT_NAME}_standalone
     --install "<BINARY_DIR>"
     --prefix "${MED_ROOT}"
     )
+
+################################################################################
+# Tests
+################################################################################
+
+add_test(NAME ${target}_test_no_gui
+    COMMAND "${MED_ROOT}/${CMAKE_INSTALL_BINDIR}/pyMedInria${CMAKE_EXECUTABLE_SUFFIX}" --test no-gui
+    )
+
+add_test(NAME ${target}_test_gui
+    COMMAND "${MED_ROOT}/${CMAKE_INSTALL_BINDIR}/pyMedInria${CMAKE_EXECUTABLE_SUFFIX}" --test gui
+    )
+
+set_property(TEST ${target}_test_no_gui PROPERTY LABELS TEST_NO_GUI)
+set_property(TEST ${target}_test_gui PROPERTY LABELS TEST_GUI)
 
 ################################################################################
 # Install
