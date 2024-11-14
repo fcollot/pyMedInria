@@ -49,11 +49,8 @@ def _create_application_class(base_class):
         _lock = Lock()
         _is_running = False
 
-        def __init__(self, argv=None):
-            if argv:
-                super().__init__(argv)
-            else:
-                super().__init__()
+        def __init__(self):
+            super().__init__()
             self.setApplicationName("pyMedInria")
 
         def gui_enabled(self):
