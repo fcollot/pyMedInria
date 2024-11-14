@@ -128,16 +128,17 @@ endif()
 # Compile definitions
 ################################################################################
 
-if(APPLE)
-    set(lib_dir "Frameworks")
-else()
-    set(lib_dir "${CMAKE_INSTALL_LIBDIR}")
+if(UNIX)
+    if(APPLE)
+        set(lib_dir "Frameworks")
+    else()
+        set(lib_dir "${CMAKE_INSTALL_LIBDIR}")
+    endif()
+    target_compile_definitions(${target} PUBLIC
+        PYTHON_HOME=".."
+        PYTHON_LIB_DIR="${lib_dir}"
+        )
 endif()
-
-target_compile_definitions(${target} PUBLIC
-    PYTHON_HOME=".."
-    PYTHON_LIB_DIR="${lib_dir}"
-    )
 
 ################################################################################
 # Link
