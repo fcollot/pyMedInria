@@ -78,7 +78,7 @@ def _create_application_class(base_class):
 
         def _run_qt(self):
             self.aboutToQuit.connect(self.deleteLater)
-            return self.exec()
+            return super().exec()
 
         def _run_console(self):
             """Run the console.
