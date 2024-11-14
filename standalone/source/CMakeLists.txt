@@ -128,14 +128,8 @@ endif()
 # Compile definitions
 ################################################################################
 
-if(APPLE)
-    set(relative_python_dir "..")
-else()
-    file(RELATIVE_PATH relative_python_dir "/${CMAKE_INSTALL_BINDIR}" "/${CMAKE_INSTALL_LIBDIR}")
-endif()
-
 target_compile_definitions(${target} PUBLIC
-    PYTHON_HOME="${relative_python_dir}"
+    PYTHON_HOME=".."
     )
 
 ################################################################################
