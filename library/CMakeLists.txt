@@ -23,8 +23,6 @@ set(cmake_args
     -D "MED_SHIBOKEN_PACKAGE:PATH=${MED_SHIBOKEN_PACKAGE}"
     )
 
-
-
 set(prefix "${CMAKE_CURRENT_BINARY_DIR}")
 
 ################################################################################

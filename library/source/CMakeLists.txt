@@ -180,8 +180,8 @@ endif()
 foreach(config ${CMAKE_CONFIGURATION_TYPES} ${CMAKE_BUILD_TYPE})
 
     configure_package_config_file("${CMAKE_CURRENT_SOURCE_DIR}/pyMedInriaConfig.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/${config}/pyMedInriaConfig.cmake"
-        INSTALL_PREFIX "/"
-        INSTALL_DESTINATION "/${MED_SHARE_SUBDIR}"
+        INSTALL_PREFIX "/foo"
+        INSTALL_DESTINATION "/foo/${MED_SHARE_SUBDIR}"
         )
 
     write_basic_package_version_file("${CMAKE_CURRENT_BINARY_DIR}/${config}/pyMedInriaConfigVersion.cmake"
