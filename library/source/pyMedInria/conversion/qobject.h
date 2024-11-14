@@ -18,7 +18,7 @@ MED_EXPORT bool pyncppToPython(const QObject* object, PyObject** output);
 MED_EXPORT bool pyncppToCPP(PyObject* nativeObject, QObject** output);
 
 template <class TYPE, typename = std::enable_if_t<std::is_base_of_v<QObject, TYPE> > >
-MED_EXPORT bool pyncppToCPP(PyObject* nativeObject, TYPE** output)
+bool pyncppToCPP(PyObject* nativeObject, TYPE** output)
 {
     return pyncppToCPP(nativeObject, (QObject**)(output));
 }
