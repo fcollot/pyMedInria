@@ -136,7 +136,7 @@ endif()
 
 target_compile_definitions(${target} PUBLIC
     PYTHON_HOME=".."
-    PYTHON_LIB_DIR=${lib_dir}
+    PYTHON_LIB_DIR="${lib_dir}"
     )
 
 ################################################################################
