@@ -181,18 +181,24 @@ install(TARGETS ${target}
 
 install(CODE "
     execute_process(
-        COMMAND ./python${CMAKE_EXECUTABLE_SUFFIX} -m ensurepip
-        COMMAND ./python${CMAKE_EXECUTABLE_SUFFIX} -m pip install -e \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/pyMedInria\"
-        WORKING_DIRECTORY \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}\"
+        COMMAND \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/python${CMAKE_EXECUTABLE_SUFFIX}\" -m ensurepip
+        )
+    "
+    COMPONENT Runtime
+    )
+
+install(CODE "
+    execute_process(
+        COMMAND \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/python${CMAKE_EXECUTABLE_SUFFIX}\"
+        -m pip install -e \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/pyMedInria\"
         )
     "
     )
 
 install(CODE "
     execute_process(
-        COMMAND ./python${CMAKE_EXECUTABLE_SUFFIX} -m ensurepip
-        COMMAND ./python${CMAKE_EXECUTABLE_SUFFIX} -m pip install \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/pyMedInria\"
-        WORKING_DIRECTORY \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}\"
+        COMMAND \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/python${CMAKE_EXECUTABLE_SUFFIX}\"
+        m pip install \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/pyMedInria\"
         )
     "
     EXCLUDE_FROM_ALL
