@@ -9,7 +9,8 @@ int main(int argc, char** argv)
 {
     int exitStatus = EXIT_SUCCESS;
 
-    med::Manager::setPythonHome(PYTHON_HOME, "Frameworks");
+
+    med::Manager::setPythonHome(PYTHON_HOME, PYTHON_LIB_DIR);
     med::Manager& pyncppManager = med::Manager::instance();
 
     if (pyncppManager.errorOccured())
