@@ -40,11 +40,11 @@ def pyside_version():
         if _pyside_version is None:
             pyside6_spec = importlib.util.find_spec('PySide6')
             if pyside6_spec is not None:
-                pyside_version = 6
+                _pyside_version = 6
             else:
                 pyside2_spec = importlib.util.find_spec('PySide2')
                 if pyside2_spec is not None:
-                    pyside_version = 2
+                    _pyside_version = 2
                 else:
                     raise ModuleNotFoundError("This packages requires PySide 2 or 6 (preferably 6).")
 
