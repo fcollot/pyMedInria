@@ -50,7 +50,7 @@ def _create_application_class(base_class):
         _is_running = False
 
         def __init__(self, argv=None):
-            super().__init__(argv=argv)
+            super().__init__(argv)
             self.setApplicationName("pyMedInria")
 
         def gui_enabled(self):
