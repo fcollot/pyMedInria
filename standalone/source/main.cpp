@@ -9,8 +9,10 @@ int main(int argc, char** argv)
 {
     int exitStatus = EXIT_SUCCESS;
 
-
+#ifdef Q_OS_UNIX
     med::Manager::setPythonHome(PYTHON_HOME, PYTHON_LIB_DIR);
+#endif
+
     med::Manager& pyncppManager = med::Manager::instance();
 
     if (pyncppManager.errorOccured())
