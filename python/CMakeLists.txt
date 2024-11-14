@@ -30,6 +30,7 @@ ExternalProject_Add(${PROJECT_NAME}_python
     INSTALL_COMMAND ${CMAKE_COMMAND}
     --install "<BINARY_DIR>"
     --prefix "${MED_ROOT}"
+    --config $<CONFIG>
     )
 
 ################################################################################
