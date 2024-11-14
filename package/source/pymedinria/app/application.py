@@ -78,7 +78,11 @@ def _create_application_class(base_class):
 
         def _run_qt(self):
             self.aboutToQuit.connect(self.deleteLater)
-            return super().exec()
+
+            if config.pyside_version() == 2:
+                return self.exec_()
+            else:
+                return self.exec()
 
         def _run_console(self):
             """Run the console.
