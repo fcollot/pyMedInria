@@ -10,7 +10,7 @@ import threading
 from . import config
 
 if config.pyside_version() == 2:
-    from PySide2.QtCore import Object, Slot, Signal
+    from PySide2.QtCore import QObject, Slot, Signal
 else:
     from PySide6.QtCore import QObject, Slot, Signal
 
