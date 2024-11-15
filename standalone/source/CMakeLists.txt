@@ -70,7 +70,7 @@ set(sources
 
 set(target ${PROJECT_NAME})
 
-add_executable(${target}
+add_executable(${target} WIN32
     ${sources}
     )
 
