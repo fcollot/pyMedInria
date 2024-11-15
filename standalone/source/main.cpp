@@ -3,21 +3,23 @@
 
 #include <pyMedInria.h>
 
+#ifdef Q_OS_WIN
+    #include <windows.h>
+#endif
+
 #include <QDebug>
 
 int main(int argc, char** argv)
 {
-    int exitStatus = EXIT_SUCCESS;
+#ifdef Q_OS_WIN
+    SetDllDirectory(L"Lib\\site-packages\\PySide2");
+#endif
 
-    for (int i = 0; i < argc; i++)
-    {
-        qDebug() << argv[i];
-    }
+    int exitStatus = EXIT_SUCCESS;
 
 //#ifdef Q_OS_UNIX
     med::Manager::setPythonHome(PYTHON_HOME, PYTHON_LIB_DIR);
 //#endif
-
     med::Manager& pyncppManager = med::Manager::instance();
 
     if (pyncppManager.errorOccured())

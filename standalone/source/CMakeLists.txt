@@ -70,7 +70,7 @@ set(sources
 
 set(target ${PROJECT_NAME})
 
-add_executable(${target}
+add_executable(${target} WIN32
     ${sources}
     )
 
@@ -228,4 +228,6 @@ if(APPLE)
         EXCLUDE_FROM_ALL
         COMPONENT Runtime
         )
+elseif(WIN32)
+
 endif()
