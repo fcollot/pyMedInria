@@ -11,7 +11,7 @@
 
 int main(int argc, char** argv)
 {
-#ifdef Q_OS_WIN
+#ifdef Q_OS_WINDOWS
     SetDllDirectory("Lib\\site-packages\\PySide2");
 #endif
 
