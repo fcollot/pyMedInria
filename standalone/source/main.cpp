@@ -9,9 +9,14 @@ int main(int argc, char** argv)
 {
     int exitStatus = EXIT_SUCCESS;
 
-#ifdef Q_OS_UNIX
+    for (int i = 0; i < argc; i++)
+    {
+        qDebug() << argv[i];
+    }
+
+//#ifdef Q_OS_UNIX
     med::Manager::setPythonHome(PYTHON_HOME, PYTHON_LIB_DIR);
-#endif
+//#endif
 
     med::Manager& pyncppManager = med::Manager::instance();
 
