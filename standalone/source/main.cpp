@@ -12,7 +12,7 @@
 int main(int argc, char** argv)
 {
 #ifdef Q_OS_WIN
-    SetDllDirectory(L"Lib\\site-packages\\PySide2");
+    SetDllDirectory("Lib\\site-packages\\PySide2");
 #endif
 
     int exitStatus = EXIT_SUCCESS;
